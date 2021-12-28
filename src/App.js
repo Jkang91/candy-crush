@@ -5,6 +5,8 @@ const candyColors = ["blue", "green", "orange", "purple", "red", "yellow"];
 
 const App = () => {
   const [currentColorArr, setCurrentColorArr] = useState([]);
+  const [ squareBeingDragged, setSquareBeingDragged] = useState(null);
+  const [ squareBeingReplaced, setSquareBeingReplaced] = useState(null);
 
   const checkForColumnOfFour = () => {
     for (let i = 0; i <= 39; i++) {
@@ -14,7 +16,8 @@ const App = () => {
       if (
         columnOfFour.every((square) => currentColorArr[square] === decidedColor)
       ) {
-        columnOfFour.forEach((square) => (currentColorArr[square] = ""));
+        columnOfFour.forEach((square) => (currentColorArr[square] = ""))
+        return true;
       }
     }
   };
@@ -33,7 +36,8 @@ const App = () => {
       if (
         rowOfFour.every((square) => currentColorArr[square] === decidedColor)
       ) {
-        rowOfFour.forEach((square) => (currentColorArr[square] = ""));
+        rowOfFour.forEach((square) => (currentColorArr[square] = ""))
+        return true;
       }
     }
   };
@@ -48,7 +52,8 @@ const App = () => {
           (square) => currentColorArr[square] === decidedColor
         )
       ) {
-        columnOfThree.forEach((square) => (currentColorArr[square] = ""));
+        columnOfThree.forEach((square) => (currentColorArr[square] = ""))
+        return true
       }
     }
   };
@@ -66,7 +71,8 @@ const App = () => {
       if (
         rowOfThree.every((square) => currentColorArr[square] === decidedColor)
       ) {
-        rowOfThree.forEach((square) => (currentColorArr[square] = ""));
+        rowOfThree.forEach((square) => (currentColorArr[square] = ""))
+        return true;
       }
     }
   };
@@ -89,14 +95,48 @@ const App = () => {
 
   const dragStart = (e) => {
     console.log(e.target)
+    setSquareBeingDragged(e.target)
   }
 
   const dragDrop = (e) => {
     console.log(e.target)
+    setSquareBeingReplaced(e.target)
   }
 
   const dragEnd = (e) => {
     console.log(e.target)
+
+    const squareBeingDraggedId = parseInt(squareBeingDragged.getAttribute('data-id'))
+    const squareBeingReplacedId = parseInt(squareBeingReplaced.getAttribute('data-id'))
+
+    currentColorArr[squareBeingReplacedId] = squareBeingDragged.style.backgroundColor
+    currentColorArr[squareBeingDraggedId] = squareBeingReplaced.style.backgroundColor
+
+    console.log('squareBeingDraggedId', squareBeingDraggedId)
+    console.log('squareBeingReplacedId', squareBeingReplacedId)
+
+    const validMoves = [
+      squareBeingDraggedId - 1,
+      squareBeingDraggedId - width,
+      squareBeingDraggedId + 1,
+      squareBeingDraggedId + width
+    ]
+
+    const validMove = validMoves.includes(squareBeingReplacedId)
+
+    const isAColumnOfFour = checkForColumnOfFour()
+    const isARowOfFour = checkForRowOfFour()
+    const isAColumnOfThree = checkForColumnOfThree()
+    const isARowOfThree = checkForRowOfThree()
+
+    if (squareBeingReplacedId && validMove && (isARowOfThree || isAColumnOfFour || isARowOfFour || isAColumnOfThree)) {
+      setSquareBeingDragged(null)
+      setSquareBeingReplaced(null)
+    } else {
+      currentColorArr[squareBeingReplacedId] = squareBeingReplaced.style.backgroundColor
+      currentColorArr[squareBeingDraggedId] = squareBeingDragged.style.backgroundColor
+      setCurrentColorArr([...currentColorArr])
+    }
   }
 
   const createBoard = () => {
